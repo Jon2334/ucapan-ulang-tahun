@@ -61,8 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
-            // FIX: Menggunakan Clean URL '/save_message' sesuai vercel.json
-            fetch('save_message', {
+            // FIX: Menggunakan path root karena file save_message.php ada di root
+            fetch('save_message.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -70,12 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(async response => {
                 const text = await response.text();
                 if (!response.ok) {
-                    throw new Error(response.status === 403 ? "Akses Ditolak (403). Cek vercel.json" : `Error: ${response.status}`);
+                    if (response.status === 403) throw new Error("Akses Ditolak (403). Pastikan vercel.json sudah benar.");
+                    throw new Error(`Server Error: ${response.status}`);
                 }
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    throw new Error("Format database tidak valid.");
+                    throw new Error("Respon server bukan format JSON yang valid.");
                 }
             })
             .then(data => {
@@ -105,11 +106,12 @@ function loadMessages() {
     const list = document.getElementById('guestbook-list');
     if(!list) return;
 
-    // FIX: Menggunakan Clean URL '/get_messages' sesuai vercel.json
-    fetch(`get_messages?t=${Date.now()}`)
+    // FIX: Menggunakan path root karena file get_messages.php ada di root
+    fetch(`get_messages.php?t=${Date.now()}`)
     .then(async response => {
         if (!response.ok) {
-            throw new Error(response.status === 403 ? "Gagal memuat pesan (Akses 403)" : `HTTP Error ${response.status}`);
+            if(response.status === 403) throw new Error("Akses Ditolak (403). Cek konfigurasi Vercel.");
+            throw new Error(`HTTP Error! Status: ${response.status}`);
         }
         return await response.json();
     })
@@ -123,6 +125,7 @@ function loadMessages() {
         data.forEach(msg => {
             const item = document.createElement('div');
             item.className = 'message-card fade-in';
+            // Menyesuaikan mapping key (nama & pesan) sesuai file PHP terbaru
             const safeName = (msg.nama || 'Anonim').replace(/</g, "&lt;");
             const safeMsg = (msg.pesan || '').replace(/</g, "&lt;");
             
