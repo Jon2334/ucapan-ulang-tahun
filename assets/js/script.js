@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
                     console.log("Autoplay dicegah browser, menunggu interaksi.");
-                    // Update UI button jika autoplay gagal
                     if(musicBtn) musicBtn.innerText = "🔇 OFF";
                 });
             }
@@ -28,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Toggle Button Musik (ON/OFF)
     if(musicBtn) {
-        // Set label awal sesuai state
         musicBtn.innerText = (bgm && !bgm.paused) ? "🎵 ON" : "🔇 OFF";
 
         musicBtn.addEventListener('click', () => {
@@ -44,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // PENTING: Simpan posisi lagu saat ini sebelum pindah halaman/refresh
     window.addEventListener('beforeunload', () => {
         if(bgm) {
             localStorage.setItem('audioTime', bgm.currentTime);
@@ -52,11 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 2. LOAD GUESTBOOK MESSAGES (Hanya di ucapan.php)
+    // 2. LOAD GUESTBOOK MESSAGES
     const guestbookList = document.getElementById('guestbook-list');
     if(guestbookList) {
         loadMessages();
-        // Auto refresh setiap 10 detik agar tidak membebani limit gratis Firebase
         setInterval(loadMessages, 10000); 
     }
 
@@ -68,14 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = this.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
             
-            // UI Loading
             btn.innerText = "Mengirim...";
             btn.disabled = true;
 
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
-            // Kirim ke api/save_message.php
             fetch('api/save_message.php', {
                 method: 'POST',
                 headers: {
@@ -83,23 +77,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
+            .then(async response => {
+                const isJson = response.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await response.json() : null;
+
+                if (!response.ok) {
+                    // Ambil pesan error dari server jika ada, atau gunakan default
+                    const error = (data && data.message) || response.statusText || 'Server Error';
+                    return Promise.reject(error);
+                }
+                return data;
+            })
             .then(data => {
                 if(data.status === 'success') {
-                    this.reset(); // Reset form
-                    loadMessages(); // Refresh list ucapan
-                    
-                    // Jika ada fungsi switchTab untuk pindah tampilan
-                    if(typeof switchTab === 'function') {
-                        switchTab('read');
-                    }
+                    this.reset();
+                    loadMessages();
+                    if(typeof switchTab === 'function') switchTab('read');
                 } else {
-                    alert('Gagal: ' + data.message);
+                    alert('Gagal: ' + (data.message || 'Terjadi kesalahan tidak diketahui'));
                 }
             })
             .catch(err => {
                 console.error("Error saving message:", err);
-                alert('Terjadi kesalahan koneksi.');
+                alert('Gagal mengirim pesan: ' + err);
             })
             .finally(() => {
                 btn.innerText = originalText;
@@ -108,19 +108,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // 4. ANIMASI BINTANG (Background)
     createStars();
 });
 
 /**
- * Fungsi Mengambil Pesan dari Database via PHP Proxy
+ * Fungsi Mengambil Pesan dengan Proteksi Error JSON
  */
 function loadMessages() {
     const list = document.getElementById('guestbook-list');
     if(!list) return;
 
     fetch('api/get_messages.php')
-    .then(response => response.json())
+    .then(async response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    })
     .then(data => {
         list.innerHTML = '';
         
@@ -133,10 +137,10 @@ function loadMessages() {
             const item = document.createElement('div');
             item.className = 'message-card fade-in';
             
-            // Sanitasi tambahan di frontend (Double Protection)
+            // Fallback jika property null/undefined
             const safeName = (msg.nama || 'Anonim').replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const safeMsg = (msg.pesan || '').replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            const safeDate = msg.waktu || '';
+            const safeDate = msg.waktu || '-';
             
             item.innerHTML = `
                 <div class="msg-sender">
@@ -150,16 +154,13 @@ function loadMessages() {
     })
     .catch(err => {
         console.error("Gagal memuat pesan:", err);
-        list.innerHTML = '<div style="text-align:center; color:red;">Gagal memuat pesan...</div>';
+        // Tampilkan pesan error yang lebih informatif di UI
+        list.innerHTML = `<div style="text-align:center; color:#ff5252; padding:10px;">Gagal memuat pesan (${err.message})</div>`;
     });
 }
 
-/**
- * Fungsi Membuat Animasi Bintang di Background
- */
 function createStars() {
     const body = document.body;
-    // Cek agar tidak menduplikasi bintang jika fungsi terpanggil ulang
     if(document.querySelectorAll('.star').length > 0) return;
 
     for(let i=0; i<50; i++) {
