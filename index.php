@@ -1,7 +1,7 @@
 <?php
 // Di Vercel, session tidak persisten, jadi kita hapus logic session
 // Konfigurasi Nama (Ganti di sini)
-$nama_penerima = "Cintaku"; 
+$nama_penerima = "Sartika Mariani Simanjuntak"; 
 ?>
 <!DOCTYPE html>
 <html lang="id">
