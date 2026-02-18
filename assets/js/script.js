@@ -1,34 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. SETUP AUDIO PLAYER
+    // === 1. SETUP AUDIO PLAYER ===
     const bgm = document.getElementById('bgm');
     const musicBtn = document.getElementById('musicControl');
     
     if(bgm) {
         bgm.volume = 0.5;
-
-        // Cek apakah musik harus diputar (dari localStorage)
         if(localStorage.getItem('musicPlaying') === 'true') {
-            // FITUR RESUME: Ambil waktu terakhir lagu
             const savedTime = localStorage.getItem('audioTime');
-            if(savedTime) {
-                bgm.currentTime = parseFloat(savedTime);
-            }
-
-            // Coba putar audio (Autoplay handle)
+            if(savedTime) bgm.currentTime = parseFloat(savedTime);
+            
             const playPromise = bgm.play();
             if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Autoplay dicegah browser, menunggu interaksi.");
+                playPromise.catch(() => {
+                    console.log("Autoplay blocked. User interaction required.");
                     if(musicBtn) musicBtn.innerText = "🔇 OFF";
                 });
             }
         }
     }
 
-    // Toggle Button Musik (ON/OFF)
     if(musicBtn) {
         musicBtn.innerText = (bgm && !bgm.paused) ? "🎵 ON" : "🔇 OFF";
-
         musicBtn.addEventListener('click', () => {
             if (bgm.paused) {
                 bgm.play();
@@ -49,14 +41,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 2. LOAD GUESTBOOK MESSAGES
+    // === 2. GUESTBOOK LOGIC ===
     const guestbookList = document.getElementById('guestbook-list');
     if(guestbookList) {
         loadMessages();
+        // Cek pesan baru tiap 10 detik
         setInterval(loadMessages, 10000); 
     }
 
-    // 3. HANDLE FORM SUBMIT (AJAX ke API)
     const msgForm = document.getElementById('guestbook-form');
     if(msgForm) {
         msgForm.addEventListener('submit', function(e) {
@@ -70,23 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
+            // Kirim ke API dengan path relatif yang benar
             fetch('api/save_message.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(async response => {
-                const isJson = response.headers.get('content-type')?.includes('application/json');
-                const data = isJson ? await response.json() : null;
-
-                if (!response.ok) {
-                    // Ambil pesan error dari server jika ada, atau gunakan default
-                    const error = (data && data.message) || response.statusText || 'Server Error';
-                    return Promise.reject(error);
+                const text = await response.text(); // Ambil raw text dulu untuk debug jika bukan JSON
+                try {
+                    const data = JSON.parse(text);
+                    if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
+                    return data;
+                } catch (e) {
+                    throw new Error(`Respon Server Bukan JSON: ${text.substring(0, 50)}`);
                 }
-                return data;
             })
             .then(data => {
                 if(data.status === 'success') {
@@ -94,12 +84,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     loadMessages();
                     if(typeof switchTab === 'function') switchTab('read');
                 } else {
-                    alert('Gagal: ' + (data.message || 'Terjadi kesalahan tidak diketahui'));
+                    alert('Gagal: ' + data.message);
                 }
             })
             .catch(err => {
-                console.error("Error saving message:", err);
-                alert('Gagal mengirim pesan: ' + err);
+                console.error("Save Error:", err);
+                alert('Error: ' + err.message);
             })
             .finally(() => {
                 btn.innerText = originalText;
@@ -111,41 +101,36 @@ document.addEventListener("DOMContentLoaded", () => {
     createStars();
 });
 
-/**
- * Fungsi Mengambil Pesan dengan Proteksi Error JSON
- */
 function loadMessages() {
     const list = document.getElementById('guestbook-list');
     if(!list) return;
 
-    fetch('api/get_messages.php')
+    // Tambahkan timestamp agar tidak kena Cache browser (Anti-lag)
+    fetch(`api/get_messages.php?t=${Date.now()}`)
     .then(async response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if(response.status === 403) throw new Error("Akses Ditolak (403). Cek folder 'api' & vercel.json");
+            throw new Error(`HTTP Error! Status: ${response.status}`);
         }
         return await response.json();
     })
     .then(data => {
         list.innerHTML = '';
-        
         if(!data || data.length === 0) {
-            list.innerHTML = '<div style="text-align:center; padding:20px; color:#ddd;">Belum ada ucapan. Yuk, jadi yang pertama!</div>';
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:#ddd;">Belum ada ucapan.</div>';
             return;
         }
 
         data.forEach(msg => {
             const item = document.createElement('div');
             item.className = 'message-card fade-in';
-            
-            // Fallback jika property null/undefined
-            const safeName = (msg.nama || 'Anonim').replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            const safeMsg = (msg.pesan || '').replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            const safeDate = msg.waktu || '-';
+            const safeName = (msg.nama || 'Anonim').replace(/</g, "&lt;");
+            const safeMsg = (msg.pesan || '').replace(/</g, "&lt;");
             
             item.innerHTML = `
                 <div class="msg-sender">
                     <span style="color:#ffeb3b">★</span> ${safeName} 
-                    <span style="float:right; font-size:0.7rem; color:#ccc; font-weight:normal;">${safeDate}</span>
+                    <span style="float:right; font-size:0.7rem; color:#ccc;">${msg.waktu || ''}</span>
                 </div>
                 <div class="msg-content">${safeMsg}</div>
             `;
@@ -153,23 +138,20 @@ function loadMessages() {
         });
     })
     .catch(err => {
-        console.error("Gagal memuat pesan:", err);
-        // Tampilkan pesan error yang lebih informatif di UI
-        list.innerHTML = `<div style="text-align:center; color:#ff5252; padding:10px;">Gagal memuat pesan (${err.message})</div>`;
+        console.error("Load Error:", err);
+        list.innerHTML = `<div style="text-align:center; color:#ff5252; font-size:0.8rem; padding:10px;">${err.message}</div>`;
     });
 }
 
 function createStars() {
-    const body = document.body;
     if(document.querySelectorAll('.star').length > 0) return;
-
+    const body = document.body;
     for(let i=0; i<50; i++) {
         let star = document.createElement('div');
         star.className = 'star';
         star.style.left = Math.random() * 100 + 'vw';
         star.style.top = Math.random() * 100 + 'vh';
         star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        star.style.opacity = Math.random();
         body.appendChild(star);
     }
 }
