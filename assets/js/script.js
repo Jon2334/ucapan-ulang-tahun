@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const guestbookList = document.getElementById('guestbook-list');
     if(guestbookList) {
         loadMessages();
-        // Cek pesan baru tiap 10 detik
         setInterval(loadMessages, 10000); 
     }
 
@@ -62,20 +61,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new FormData(this);
             const payload = Object.fromEntries(formData.entries());
 
-            // Kirim ke API dengan path relatif yang benar
-            fetch('api/save_message.php', {
+            // FIX: Menggunakan Clean URL '/save_message' sesuai vercel.json
+            fetch('save_message', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(async response => {
-                const text = await response.text(); // Ambil raw text dulu untuk debug jika bukan JSON
+                const text = await response.text();
+                if (!response.ok) {
+                    throw new Error(response.status === 403 ? "Akses Ditolak (403). Cek vercel.json" : `Error: ${response.status}`);
+                }
                 try {
-                    const data = JSON.parse(text);
-                    if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
-                    return data;
+                    return JSON.parse(text);
                 } catch (e) {
-                    throw new Error(`Respon Server Bukan JSON: ${text.substring(0, 50)}`);
+                    throw new Error("Format database tidak valid.");
                 }
             })
             .then(data => {
@@ -84,12 +84,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     loadMessages();
                     if(typeof switchTab === 'function') switchTab('read');
                 } else {
-                    alert('Gagal: ' + data.message);
+                    alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
                 }
             })
             .catch(err => {
                 console.error("Save Error:", err);
-                alert('Error: ' + err.message);
+                alert(err.message);
             })
             .finally(() => {
                 btn.innerText = originalText;
@@ -105,12 +105,11 @@ function loadMessages() {
     const list = document.getElementById('guestbook-list');
     if(!list) return;
 
-    // Tambahkan timestamp agar tidak kena Cache browser (Anti-lag)
-    fetch(`api/get_messages.php?t=${Date.now()}`)
+    // FIX: Menggunakan Clean URL '/get_messages' sesuai vercel.json
+    fetch(`get_messages?t=${Date.now()}`)
     .then(async response => {
         if (!response.ok) {
-            if(response.status === 403) throw new Error("Akses Ditolak (403). Cek folder 'api' & vercel.json");
-            throw new Error(`HTTP Error! Status: ${response.status}`);
+            throw new Error(response.status === 403 ? "Gagal memuat pesan (Akses 403)" : `HTTP Error ${response.status}`);
         }
         return await response.json();
     })
