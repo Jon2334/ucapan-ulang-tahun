@@ -1,26 +1,23 @@
 {
-  "version": 2,
-  "functions": {
-    "*.php": {
-      "runtime": "vercel-php@0.7.1"
-    }
-  },
-  "routes": [
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/get_messages",
-      "dest": "/get_messages.php"
-    },
-    {
-      "src": "/save_message",
-      "dest": "/save_message.php"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+    "version": 2,
+    "builds": [
+        {
+            "src": "*.php",
+            "use": "vercel-php@0.7.1"
+        },
+        {
+            "src": "assets/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(assets/.*)",
+            "dest": "/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/$1"
+        }
+    ]
 }
