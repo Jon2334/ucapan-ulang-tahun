@@ -1,12 +1,7 @@
 <?php
-session_start();
-
-// --- KONFIGURASI NAMA PENERIMA (HARDCODED) ---
-// Ganti "Cintaku" di bawah ini dengan nama panggilan kesayangan dia.
+// Di Vercel, session tidak persisten, jadi kita hapus logic session
+// Konfigurasi Nama (Ganti di sini)
 $nama_penerima = "Cintaku"; 
-
-// Simpan nama ke dalam session secara otomatis agar bisa dipakai di halaman lain
-$_SESSION['sender_name'] = $nama_penerima;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -18,7 +13,6 @@ $_SESSION['sender_name'] = $nama_penerima;
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        /* Sedikit penyesuaian khusus untuk halaman index baru */
         .btn-start {
             display: inline-block;
             text-decoration: none;
@@ -43,18 +37,14 @@ $_SESSION['sender_name'] = $nama_penerima;
         <br>
         <p style="font-size: 0.9rem; opacity: 0.8;">Ada sesuatu kecil yang ingin kutunjukkan padamu.</p>
         
-        <!-- Tombol langsung ke countdown.php karena nama sudah di-set -->
+        <!-- Tombol langsung ke countdown.php -->
         <a href="countdown.php" class="btn-start">Mulai Perjalanan ❤️</a>
     </div>
 
-    <!-- Script Load -->
     <script src="assets/js/script.js"></script>
     <script>
-        // Logika Memulai Musik
         document.querySelector('.btn-start').addEventListener('click', function() {
-            // 1. Set status musik agar auto-play di halaman berikutnya
             localStorage.setItem('musicPlaying', 'true');
-            // 2. Reset waktu lagu ke 0 agar mulai dari awal
             localStorage.setItem('audioTime', 0);
         });
     </script>

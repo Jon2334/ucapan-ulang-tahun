@@ -1,6 +1,6 @@
 <?php
-session_start();
-$nama_penerima = isset($_SESSION['sender_name']) ? $_SESSION['sender_name'] : "Sayang";
+// Session dihapus. Set nama manual agar aman di Vercel.
+$nama_penerima = "Cintaku"; 
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -8,7 +8,7 @@ $nama_penerima = isset($_SESSION['sender_name']) ? $_SESSION['sender_name'] : "S
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Birthday!</title>
-    <link href="[https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;600&display=swap](https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;600&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         .confetti { position: absolute; width: 10px; height: 10px; background: #ffd1dc; animation: fall 3s linear infinite; }
@@ -42,71 +42,169 @@ $nama_penerima = isset($_SESSION['sender_name']) ? $_SESSION['sender_name'] : "S
             justify-content: center;
             align-items: flex-end;
         }
+
+        /* Piring */
         .plate {
-            position: absolute; bottom: 0; width: 220px; height: 12px;
-            background: #f5f5f5; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1;
+            position: absolute;
+            bottom: 0;
+            width: 220px;
+            height: 12px;
+            background: #f5f5f5;
+            border-radius: 50%; /* Piring lebih bulat */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 1;
         }
+
+        /* Badan Kue */
         .cake-body {
-            position: absolute; bottom: 6px; width: 180px; height: 85px;
-            background: linear-gradient(to right, #6a1b9a 0%, #9c27b0 30%, #8e24aa 60%, #6a1b9a 100%);
-            border-radius: 10px 10px 5px 5px; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3); z-index: 2;
+            position: absolute;
+            bottom: 6px; /* Di atas piring */
+            width: 180px;
+            height: 85px;
+            background: linear-gradient(to right, #6a1b9a 0%, #9c27b0 30%, #8e24aa 60%, #6a1b9a 100%); /* Gradient lebih halus */
+            border-radius: 10px 10px 5px 5px;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3);
+            z-index: 2;
         }
+
+        /* Lapisan Krim Atas */
         .cake-top {
-            position: absolute; bottom: 85px; width: 184px; left: 50%; transform: translateX(-50%);
-            height: 40px; background: #f48fb1; border-radius: 50% 50% 10px 10px; z-index: 3;
+            position: absolute;
+            bottom: 85px; /* Sesuai tinggi body */
+            width: 184px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 40px;
+            background: #f48fb1;
+            border-radius: 50% 50% 10px 10px; /* Efek membulat di atas */
+            z-index: 3;
             box-shadow: 0 3px 5px rgba(0,0,0,0.1);
         }
+
+        /* Lelehan Krim */
         .drips {
-            position: absolute; top: 25px; width: 100%; display: flex; justify-content: space-between;
-            padding: 0 8px; z-index: 3;
+            position: absolute;
+            top: 25px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px;
+            z-index: 3;
         }
         .drip {
-            width: 15px; height: 25px; background: #f48fb1; border-radius: 0 0 15px 15px;
+            width: 15px;
+            height: 25px;
+            background: #f48fb1;
+            border-radius: 0 0 15px 15px;
             box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
         }
-        .drip:nth-child(2) { height: 15px; } .drip:nth-child(4) { height: 18px; }
+        .drip:nth-child(2) { height: 15px; }
+        .drip:nth-child(4) { height: 18px; }
 
+        /* Lilin Angka */
         .candles {
-            position: absolute; bottom: 105px; width: 100%; display: flex;
-            justify-content: center; gap: 8px; z-index: 4;
+            position: absolute;
+            bottom: 105px; /* Disesuaikan agar menancap di kue */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 8px; /* Jarak antar angka lebih rapat */
+            z-index: 4;
         }
         .number-candle {
-            font-family: 'Poppins', sans-serif; font-weight: 900; font-size: 60px;
-            color: #FFD700; background: linear-gradient(to bottom, #fff59d, #fbc02d);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 1px #f57f17; filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
-            position: relative; line-height: 1;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-size: 60px;
+            color: #FFD700;
+            background: linear-gradient(to bottom, #fff59d, #fbc02d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -webkit-text-stroke: 1px #f57f17;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)); /* Glow pada angka */
+            position: relative;
+            line-height: 1;
         }
+        
+        /* Api Lilin - LEBIH MENYALA */
         .flame {
-            position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
-            width: 16px; height: 30px;
+            position: absolute;
+            top: -35px; /* Posisi api di atas angka */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 30px;
             background: radial-gradient(ellipse at bottom, #fff 20%, #ffeb3b 50%, #ff9800 90%, transparent 100%);
             border-radius: 50% 50% 20% 20%;
-            box-shadow: 0 0 10px #fff, 0 -5px 20px #ffeb3b, 0 -10px 30px #ff5722;
-            animation: flicker 0.1s infinite alternate; transform-origin: bottom center;
+            /* Efek Glow Kuat */
+            box-shadow: 
+                0 0 10px #fff, 
+                0 -5px 20px #ffeb3b, 
+                0 -10px 30px #ff5722;
+            animation: flicker 0.1s infinite alternate; /* Berkedip cepat */
+            transform-origin: bottom center;
         }
+        
+        /* Wick (Sumbu Lilin) */
         .number-candle::after {
-            content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
-            width: 2px; height: 8px; background: #333;
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #333;
         }
+
         @keyframes flicker {
             0% { transform: translateX(-50%) scale(1) skewX(2deg); opacity: 0.9; }
+            25% { transform: translateX(-50%) scale(1.1) skewX(-2deg); opacity: 1; }
+            50% { transform: translateX(-50%) scale(0.9) skewX(1deg); opacity: 0.8; }
+            75% { transform: translateX(-50%) scale(1.05) skewX(-1deg); opacity: 1; }
             100% { transform: translateX(-50%) scale(1) skewX(0deg); opacity: 0.9; }
         }
 
+        /* --- Style Layout --- */
         .guestbook-wrapper {
-            margin-top: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 15px;
-            padding: 10px; max-height: 400px; overflow-y: auto;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
         }
+        
         .toggle-write-btn {
-            background: linear-gradient(45deg, #ff758c, #ff7eb3); border: none; color: white;
-            padding: 10px 25px; border-radius: 25px; font-size: 0.9rem; font-weight: 600;
-            cursor: pointer; margin-top: 25px; margin-bottom: 10px; font-family: 'Poppins';
-            transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4); display: inline-block;
+            background: linear-gradient(45deg, #ff758c, #ff7eb3);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-family: 'Poppins';
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+            display: inline-block;
         }
-        .toggle-write-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 117, 140, 0.6); }
-        #write-section { display: none; margin-top: 15px; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .toggle-write-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 117, 140, 0.6);
+        }
+        
+        #write-section {
+            display: none; /* Sembunyi default */
+            margin-top: 15px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
@@ -136,6 +234,7 @@ $nama_penerima = isset($_SESSION['sender_name']) ? $_SESSION['sender_name'] : "S
 
         <h1>Selamat Ulang Tahun<br><span style="color: #ff9a9e;"><?= htmlspecialchars($nama_penerima) ?></span></h1>
         
+        <!-- Kata-kata Romantis -->
         <p style="font-size: 0.95rem; margin-bottom: 20px; color: #f0f0f0; line-height: 1.6; font-style: italic;">
             "Dua puluh tahun perjalananmu di dunia,<br>
             terima kasih telah tumbuh menjadi jiwa yang begitu indah.<br>
@@ -144,7 +243,7 @@ $nama_penerima = isset($_SESSION['sender_name']) ? $_SESSION['sender_name'] : "S
 
         <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
 
-        <!-- DAFTAR PESAN -->
+        <!-- DAFTAR PESAN (Selalu Tampil) -->
         <h3 style="font-family: 'Poppins'; font-size: 1rem; margin-bottom: 10px; text-align:left; padding-left:10px;">📖 Pesan Masuk</h3>
         <div class="guestbook-wrapper">
             <div id="guestbook-list" class="guestbook-container">

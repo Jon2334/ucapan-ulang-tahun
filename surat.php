@@ -1,4 +1,6 @@
-<?php session_start(); ?>
+<?php 
+// Session dihapus agar kompatibel dengan Vercel Serverless
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
