@@ -1,0 +1,183 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Dancing Script', cursive; /* Pastikan import Google Font */
+}
+
+body {
+    background: linear-gradient(135deg, #1a0b2e, #4b1d52, #ff758c);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Typography */
+h1 { font-size: 3rem; text-shadow: 0 0 10px rgba(255,192,203,0.7); }
+p { font-size: 1.2rem; font-family: 'Poppins', sans-serif; font-weight: 300; }
+
+/* Animations */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Components */
+.container {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    animation: float 6s ease-in-out infinite;
+}
+
+.btn-start, .btn-submit {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #ff758c;
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-start:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #ff758c;
+}
+
+.input-name, .input-msg {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Guestbook Specific */
+.guestbook-container {
+    margin-top: 30px;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+}
+.message-card {
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #ff758c;
+}
+.msg-sender { font-weight: bold; color: #ffcae9; font-family: 'Poppins'; font-size: 0.9rem; }
+.msg-content { font-family: 'Poppins'; font-size: 0.85rem; margin-top: 5px; }
+
+/* Stars Background */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+/* --- Tambahan untuk Tab Navigation --- */
+.tab-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 50px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #ffcae9;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    opacity: 0.7;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 117, 140, 0.2);
+    opacity: 1;
+}
+
+.tab-btn.active {
+    background: #ff758c;
+    color: white;
+    opacity: 1;
+    box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+}
+
+/* Tab Content Areas */
+.tab-content {
+    display: none; /* Sembunyikan semua tab secara default */
+    animation: fadeIn 0.5s ease;
+}
+
+.tab-content.active {
+    display: block; /* Tampilkan yang aktif */
+}
+
+/* Animasi Fade In simpel */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Penyesuaian Guestbook Container agar lebih luas */
+.guestbook-container {
+    margin-top: 10px;
+    max-height: 400px; /* Sedikit lebih tinggi */
+    overflow-y: auto;
+    text-align: left;
+    padding-right: 5px;
+}
+
+/* Scrollbar cantik */
+.guestbook-container::-webkit-scrollbar {
+    width: 5px;
+}
+.guestbook-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+.guestbook-container::-webkit-scrollbar-thumb {
+    background: #ff758c;
+    border-radius: 10px;
+}
